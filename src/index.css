@@ -38,4 +38,17 @@
   .card {
     @apply bg-white rounded-xl shadow-md p-6 transition-shadow hover:shadow-lg;
   }
+
+  .map-placeholder {
+    @apply w-full flex items-center justify-center bg-gray-100 rounded-lg border border-gray-200;
+    height: 260px;
+  }
+
+  .map-placeholder-content {
+    @apply text-center text-gray-500 px-4;
+  }
+
+  .map-icon {
+    @apply text-4xl mb-2;
+  }
 }

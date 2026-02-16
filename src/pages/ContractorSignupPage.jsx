@@ -1,9 +1,8 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
 import { equipmentCategories, serviceRadiusOptions } from '../data/categories';
 import ServiceAreaMap from '../components/ServiceAreaMap';
-import { geocodeAddress } from '../utils/zipCodeService';
 
 const ContractorSignupPage = () => {
   const { t } = useTranslation();
@@ -11,41 +10,11 @@ const ContractorSignupPage = () => {
   const [serviceArea, setServiceArea] = useState(null);
   const [estimatedZips, setEstimatedZips] = useState(0);
   const [mapCenter, setMapCenter] = useState(null);
-  const [mapStatus, setMapStatus] = useState('');
-  
+
   const { register, handleSubmit, watch, formState: { errors } } = useForm();
-  
+
   const selectedRadius = watch('serviceRadius');
   const selectedAddress = watch('businessAddress');
-
-  const mapboxToken = import.meta.env.VITE_MAPBOX_TOKEN;
-
-  // Geocode address to center the map (debounced)
-  useEffect(() => {
-    if (!mapboxToken) {
-      setMapStatus('Mapbox token is missing');
-      return;
-    }
-    if (!selectedAddress || selectedAddress.trim().length < 6) {
-      setMapCenter(null);
-      setMapStatus('');
-      return;
-    }
-
-    setMapStatus('Locating address…');
-    const handle = setTimeout(async () => {
-      try {
-        const { lng, lat } = await geocodeAddress(mapboxToken, selectedAddress.trim());
-        setMapCenter({ lng, lat });
-        setMapStatus('');
-      } catch (e) {
-        setMapCenter(null);
-        setMapStatus('Address not found');
-      }
-    }, 600);
-
-    return () => clearTimeout(handle);
-  }, [selectedAddress, mapboxToken]);
 
   const onSubmit = async (data) => {
     try {
@@ -177,19 +146,15 @@ const ContractorSignupPage = () => {
                 </div>
 
                 <ServiceAreaMap
-                  token={mapboxToken}
-                  center={mapCenter}
+                  address={selectedAddress}
                   radiusMiles={selectedRadius ? Number(selectedRadius) : 0}
-                  height={384}
+                  onCenterChange={setMapCenter}
                 />
 
                 {selectedRadius && (
                   <div className="bg-white border border-gray-200 px-4 py-3 rounded-lg">
                     <p className="text-sm">Coverage: <strong>{selectedRadius} miles radius</strong></p>
                     <p className="text-xs text-gray-600 mt-1">≈ {estimatedZips} ZIP codes</p>
-                    {!mapboxToken && (
-                      <p className="text-xs text-red-600 mt-2">Mapbox token is missing. Add <code>VITE_MAPBOX_TOKEN</code> to your environment variables.</p>
-                    )}
                   </div>
                 )}
 
